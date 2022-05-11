@@ -34,7 +34,7 @@ function notify()
 
 # 校验配置文件
 function readConfig()
-{   
+{
     splitline "*"
     read -p "请输入仓库配置文件名称 ：" config
     fullpath=$(pwd)"/$config"
@@ -42,25 +42,25 @@ function readConfig()
         echo "输入内容为空，请重新输入！"
         readConfig
     fi
-    if [ ! -e $fullpath ] 
+    if [ ! -e $fullpath ]
     then
         echo "文件不存在，请核对路径及文件名。程序退出！"
         splitline "*"
         exit
     fi
-
+    
     if test ! -s $fullpath;then
         echo "此文件为空文件，请核对文件是否正确，程序退出！"
         splitline "*"
         exit
     fi
     echo "配置文件校验完成，请按照提示继续输入所需信息！"
-
+    
 }
 
 # 重复循环录入某信息，直至不为空，可设置正则来匹配
 function repeats()
-{   
+{
     local notion=$1
     local theme=$2
     read -p "${notion}" input
@@ -73,7 +73,7 @@ function repeats()
 
 # 获取键入信息并核对
 function reads()
-{   
+{
     splitline "*"
     # 重复获取分支名，直至不为空
     branch=$(repeats "$read_branch" "$branch_theme")
@@ -87,14 +87,14 @@ function reads()
 
 # 确认信息
 function confirm()
-{   
+{
     # 首次提示确信并读取
     read -p "请确认信息是否正确 [ y 确定 / n 撤销 ] ? ：" answer
     # 输入空或输入不为y，一直循环
     while [ -z "$answer" -o "$answer" != "y" ]
-    do  
+    do
         # 确认撤销，则重置信息，退出循环至信息录入
-        if [ "$answer" == "n" ] 
+        if [ "$answer" == "n" ]
         then
             echo "已撤销输入内容，请重新跟随提示输入！"
             branch=""
@@ -109,22 +109,22 @@ function confirm()
 
 # 添加仓库
 function addRepo()
-{   
+{
     local pro=$1
     splitline "x"
     echo "${pro}项目添加fork库仓库地址及修改配置文件程序开始"
-
+    
     # 进入项目目录，添加fork库的remote信息
     cd $pro
     $(git remote add fork ${head}${account}/${pro}${tail})
-
+    
     # 推送当前分支去fork库
     $(git push -v fork $branch)
-
+    
     # 进入git的默认库配置目录 修改配置文件中的默认库为fork
     cd .git
     $(sed -i.bak "s/remote = origin/remote = fork/" config)
-
+    
     # 退出至工作目录
     cd ../..
     echo "${pro}项目添加fork库仓库地址及修改配置文件程序结束"
@@ -154,7 +154,7 @@ function scans()
             continue
         fi
         local prj=$(echo $content | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}')
-        if [ -e "$present/$prj" ] 
+        if [ -e "$present/$prj" ]
         then
             printf "$msg ${prj} 项目已存在，无法再次下载\n"
             continue
@@ -168,7 +168,7 @@ function scans()
 
 # 下载函数
 function download()
-{   
+{
     # 读取arr数组中可下载文件的行号
     # 将可下载的文件均进行依次下载
     # 使用下标的方式进行遍历
@@ -185,11 +185,11 @@ function download()
         echo "项目${project}下载开始，当前进度 $(($i + 1)) / $count ｜ 状态：开始"
         splitline "x"
         # 下载
-        # git clone --progress --branch 
+        # git clone --progress --branch
         local cmd="git clone --progress --branch ${branch} -v $address"
         echo "$cmd"
         $cmd
-        if [ $? -eq 0 ] 
+        if [ $? -eq 0 ]
         then
             echo "clone项目成功，clone结束"
             addRepo $project
@@ -213,7 +213,7 @@ function main()
     readConfig # 校验配置文件并获取全路径
     # scans # 扫描全路径下内容
     reads # 读取账号和项目名
-    download # 下载可以下载的项目  
+    download # 下载可以下载的项目
 }
 
 main
