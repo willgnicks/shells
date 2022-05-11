@@ -38,6 +38,10 @@ function readConfig()
     splitline "*"
     read -p "请输入仓库配置文件名称 ：" config
     fullpath=$(pwd)"/$config"
+    if test -z $config;then
+        echo "输入内容为空，请重新输入！"
+        readConfig
+    fi
     if [ ! -e $fullpath ] 
     then
         echo "文件不存在，请核对路径及文件名。程序退出！"
@@ -46,7 +50,7 @@ function readConfig()
     fi
 
     if test ! -s $fullpath;then
-        echo "文件存在但文件为空，请核对文件是否正确，程序退出！"
+        echo "此文件为空文件，请核对文件是否正确，程序退出！"
         splitline "*"
         exit
     fi
