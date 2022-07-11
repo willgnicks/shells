@@ -37,6 +37,7 @@ function readConfig()
 {
     splitline "*"
     read -p "请输入仓库配置文件名称 ：" config
+    cd ..
     fullpath=$(pwd)"/$config"
     if test -z $config;then
         echo "输入内容为空，请重新输入！"
@@ -142,15 +143,14 @@ function scans()
     printf "配置文件全路径：$fullpath;\n指定分支名：$branch;\n指定识别账户：$account;\n"
     splitline "="
     echo "** 开始扫描当前文件夹  **"
-    local count=$(awk 'END{print NR}' $fullpath)
+    local count=$(grep -v "#" $fullpath | awk 'END{print NR}' )
     local present=$(pwd)
     local counter=0
     for((i=1;i<=count;i++));
     do
         local msg="| 扫描进度 $i / $count \t | "
-        local content=$(sed -n ${i}p $fullpath)
+        local content=$(sed -n ${i}p $fullpath | grep -v "#")
         if [ -z "$content" ];then
-            printf "$msg 当前行内容为空，自动跳过\n"
             continue
         fi
         local prj=$(echo $content | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}')
@@ -178,11 +178,12 @@ function download()
     local count=${#arr[@]}
     # 读取配置文件 拼接命令 下载主库
     for((i=0;i<$count;i++));
-    do
+    do  
+    {
         local index=${arr[$i]}
         local address=$(sed -n ${index}p $fullpath)
         local project=$(echo ${address} | awk -F '/' '{print $NF}' | awk -F '.' '{print $1}')
-        echo "项目${project}下载开始，当前进度 $(($i + 1)) / $count ｜ 状态：开始"
+        echo "项目${project}下载开始｜ 状态：开始"
         splitline "x"
         # 下载
         # git clone --progress --branch
@@ -197,9 +198,11 @@ function download()
             echo "clone项目失败，请核对授权及地址"
             continue
         fi
-        echo "项目${project}下载开始，当前进度 $(($i + 1)) / $count ｜ 状态：完成"
+        echo "项目${project}下载结束 ｜ 状态：完成"
         splitline "="
+    } &
     done
+    wait
     local end=$(date +%s)
     local cost=$(($end - $start))
     echo "脚本运行完成，共耗时：$cost 秒"
