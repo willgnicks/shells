@@ -143,7 +143,8 @@ function scans()
     printf "配置文件全路径：$fullpath;\n指定分支名：$branch;\n指定识别账户：$account;\n"
     splitline "="
     echo "** 开始扫描当前文件夹  **"
-    local count=$(grep -v "#" $fullpath | awk 'END{print NR}' )
+    local content=$(sed '/^$/d' $fullpath | grep -v "#"  )
+    local count=$(sed '/^$/d' $fullpath | grep -v "#" | awk 'END{print NR}' )
     local present=$(pwd)
     local counter=0
     for((i=1;i<=count;i++));
