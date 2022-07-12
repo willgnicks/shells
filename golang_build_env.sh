@@ -1,5 +1,6 @@
 #!/bin/bash
 
+STRUCTURE=("src" "pkg" "bin")
 PACKAGE="go1.18.3.linux-amd64.tar.gz"
 INSTALL_TARGET="/usr/local/go"
 PATH_NAME="/projects/go_projects"
@@ -52,7 +53,9 @@ function download()
 function addPath()
 {   
     if test ! -d "$HOME$PATH_NAME";then
-        mkdir -p "$HOME$PATH_NAME"
+        for dir in ${STRUCTURE[*]};do
+            mkdir -p "$HOME$PATH_NAME/$dir"
+        done
     fi
     printf "$NOTE\n$GOROOT\n$GOPATH\n$NEWPATH" >> $BASHFILE
     source $BASHFILE
