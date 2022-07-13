@@ -10,6 +10,7 @@ GOROOT="export GOROOT=/usr/local/go"
 GOPATH="export GOPATH=$HOME$PATH_NAME"
 NEWPATH='export PATH=$PATH:$GOROOT/bin:$GOPATH/bin'
 BASHFILE="$HOME/.bashrc"
+ZSHFILE="$HOME/.zshrc"
 
 # split line
 function splitline()
@@ -59,6 +60,8 @@ function addPath()
     fi
     printf "$NOTE\n$GOROOT\n$GOPATH\n$NEWPATH" >> $BASHFILE
     source $BASHFILE
+    printf "$NOTE\n$GOROOT\n$GOPATH\n$NEWPATH" >> $ZSHFILE
+    source $ZSHFILE
     echo "set path finish!"
     splitline "="
 }
