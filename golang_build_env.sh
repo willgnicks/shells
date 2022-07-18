@@ -60,7 +60,7 @@ function addPath()
     fi
     printf "$NOTE\n$GOROOT\n$GOPATH\n$NEWPATH" >> $BASHFILE
     source $BASHFILE
-    printf "$NOTE\n$GOROOT\n$GOPATH\n$NEWPATH" >> $ZSHFILE
+    printf "\n$NOTE\n$GOROOT\n$GOPATH\n$NEWPATH\n\n" >> $ZSHFILE
     source $ZSHFILE
     echo "set path finish!"
     splitline "="
