@@ -1,7 +1,11 @@
 #!/bin/bash
 
+PUBLIC=$(pwd)"/public.sh"
 STRUCTURE=("src" "pkg" "bin")
 PACKAGE="go1.18.3.linux-amd64.tar.gz"
+IP="https://golang.google.cn/dl/$PACKAGE"
+
+
 INSTALL_TARGET="/usr/local/go"
 PATH_NAME="/projects/go_projects"
 
@@ -9,26 +13,17 @@ NOTE="# set golang path"
 GOROOT="export GOROOT=/usr/local/go"
 GOPATH="export GOPATH=$HOME$PATH_NAME"
 NEWPATH='export PATH=$PATH:$GOROOT/bin:$GOPATH/bin'
-BASHFILE="$HOME/.bashrc"
-ZSHFILE="$HOME/.zshrc"
 
-# split line
-function splitline()
+function sourcePublic()
 {
-    s=$(printf "%-80s" "$1")
-    echo "${s// /$1}"
-}
-
-function verify()
-{
-    if test $1 -ne 0;then
-        echo "error occurs during $2"
-        exit 1
+    if [[ ! -f "$PUBLIC" ]];then
+        echo "[ERROR] Shell script, $PUBLIC, do not exist. This script exit! [ERROR] "
+        exit
     fi
+    source "$PUBLIC"
 }
-
 # untar package
-function untarPackage()
+function untar()
 {
     if test ! -e "$INSTALL_TARGET";then
         mkdir -p $INSTALL_TARGET
@@ -39,7 +34,7 @@ function untarPackage()
 }
 
 # download resource package
-function download()
+function downloadPackage()
 {   
     if test ! -e "$HOME/$PACKAGE";then
         wget -P $HOME "https://golang.google.cn/dl/$PACKAGE"

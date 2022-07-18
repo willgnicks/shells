@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# public shell script for other scripts use
+# public shell script for other scripts invoke
 # contain:
 # 1. download zip package to tools directory
 # 2. untar the package to destination
@@ -11,14 +11,14 @@
 
 BASHFILE="$HOME/.bashrc"
 ZSHFILE="$HOME/.zshrc"
-DEFAULT_SOFTWARE_PATH="/opt/tools/"
+DEFAULT_SOFTWARE_PATH="/opt/tools"
 DEFAULT_SOFTWARE_DIRS="compressed_packages resource_files"
 
 # split lines
 # accept one param of split char
 function splitline()
 {
-    s=$(printf "%-80s" "$1")
+    s=$(printf "%-200s" "$1")
     echo "${s// /$1}"
 }
 
@@ -34,6 +34,15 @@ function verifyPath()
     fi
 }
 
+# echo log message
+# 1. function name
+# 2. msg
+# 3. type
+function echoLog()
+{
+    echo "[$3] $1 : $2 [$3]"
+}
+
 # verify if function proceed successfully
 # given two parameters are
 # 1. for the function return status code
@@ -41,7 +50,8 @@ function verifyPath()
 function verify()
 {
     if test $1 -ne 0;then
-        echo "errors occur during $2"
+        echoLog "public.sh/Verify" "errors occur during $2" "ERROR"
+        splitline "*"
         exit 1
     fi
 }
@@ -52,35 +62,24 @@ function verify()
 # 2. the package name for download
 function download()
 {
+    echoLog "public.sh/Download" "Downloading with parameters { package : $2, url : $1 }" "INFO"
     local url=$1
     local package=$2
-    local path="$DEFAULT_SOFTWARE_PATH"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $1}')
+    local path="$DEFAULT_SOFTWARE_PATH/"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $1}')
     if [[ -z $package ]] || [[ -z $url ]];then
-        echo "package or url parameter is NULL, exit!"
+        echoLog "public.sh/Download" "Download parameters package or url is NULL!" "ERROR"
         return 1
     fi
     
     if [[ ! -e "$path/$package" ]];then
         wget -P $path "$url$package"
         verify $? "downloading package $package!"
-        echo "download $package finish!"
+        echoLog "public.sh/Download" "Download $package finish!" "INFO"
         return 0
     fi
-    echo "package exists, no need to download again!"
+    echoLog "public.sh/Download" "Package $package exists, no need to download again!" "INFO"
     return 0
 }
-
-# echo log message
-# 1. function name
-# 2. msg
-# 3. type
-function echoLog()
-{
-    
-    echo "[$3] public.sh/$1 : $2 [$3]"
-
-}
-
 
 # untar the package to specific path
 # given two parameters are
@@ -89,29 +88,30 @@ function echoLog()
 #    if it's null, resource path instead
 function untarPackage()
 {   
+    echoLog "public.sh/UntarPackage" "Untaring package starts with parameters { package : $1, target_path : $2 }!" "INFO"
     if [[ -z $1 ]];then
-        echoLog "UntarPackage" "Required parameter package name is absent!" "ERROR"
+        echoLog "public.sh/UntarPackage" "Required parameter - package name is absent!" "ERROR"
         return 1
     fi
     # init path with default path
-    local target_path="$DEFAULT_SOFTWARE_PATH"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $2}')
+    local target_path="$DEFAULT_SOFTWARE_PATH/"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $2}')
     # if there is given path, dont use default one
     if test -n "$2";then
         verifyPath "$2"
         if test $? -ne 0;then
-            echoLog "UntarPackage" "Given path is unavailable!" "ERROR"
+            echoLog "public.sh/UntarPackage" "Given path is unavailable!" "ERROR"
             return 1
         fi
         target_path="$2"
     fi
-    local package_path="$DEFAULT_SOFTWARE_PATH"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $1}')"/$1"
-    echoLog "UntarPackage" "Untaring parameters { target_path : $target_path, package_path : $package_path }" "ERROR"
+    local package_path="$DEFAULT_SOFTWARE_PATH/"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $1}')"/$1"
     if [[ ! -f "$package_path" ]];then
-        echo "given package $1 is not existed in default software path $DEFAULT_SOFTWARE_PATH"$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $1}')
+        echoLog "public.sh/UntarPackage" "Given package $1 is not existed in default software path $DEFAULT_SOFTWARE_PATH/$(echo $DEFAULT_SOFTWARE_DIRS | awk '{print $1}')" "ERROR"
         return 1
     fi
     tar -xf "$package_path" -C $target_path
     verify $? "untaring package $package_path!"
+    echoLog "public.sh/UntarPackage" "Untaring package $1 successfully with parameters { target_path : $target_path, package_path : $package_path }!" "INFO"
     return 0
 }
 
@@ -137,14 +137,14 @@ function makeDirs()
         local fullpath="$path/$var"
         verifyPath "$fullpath"
         if [[ $? -ne 0 ]];then
-            echo "given path and directories make up fullpath $fullpath error, please check!"
+            echoLog "public.sh/MakeDirs" "Given path and directories make up fullpath $fullpath error, please check!" "ERROR"
             continue
         fi
         if [[ ! -d "$fullpath" ]];then
             mkdir -p "$fullpath"
-            echo "create directory $fullpath successfully!"
+            echoLog "public.sh/MakeDirs" "Create directory $fullpath successfully!" "INFO"
         else
-            echo "directory $fullpath exists, no need to create!"
+            echoLog "public.sh/MakeDirs" "Directory $fullpath exists, no need to create!" "INFO"
         fi
     done
 }
@@ -158,5 +158,3 @@ function addLink()
     ln -s "$1" "$2"
     verify $? "soft link creation with param { \$1:$1, \$2:$2}!"
 }
-
-makeDirs "$DEFAULT_SOFTWARE_PATH" "$DEFAULT_SOFTWARE_DIRS"
