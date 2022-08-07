@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface Storehouse<T> {
     // 仓库默认容量
-    public static final int DEFAULT_CAPACITY = 50000;
+    public static final int DEFAULT_CAPACITY = 5000;
 
     /**
      * 将传入数据生产
