@@ -68,7 +68,7 @@ public class ProductStorehouse implements Storehouse<Product> {
         while (flag || !this.data.isEmpty()) {
             synchronized (signal) {
                 try {
-                    while (this.data.isEmpty()) {
+                    while (this.data.isEmpty() && flag) {
                         signal.wait();
                     }
                     PrintUtil.inform(consumer, Thread.currentThread().getName(), "信号量",flag,"数据量",data.size());
